@@ -10,9 +10,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Main" component={MainScreen} />
-        <Stack.Screen name="NewSubscription" component={NewSubscriptionScreen} />
-        <Stack.Screen name="EditSubscription" component={EditSubscriptionScreen} />
+        <Stack.Screen name=" " component={MainScreen} />
+        <Stack.Screen name="New Subscription" component={NewSubscriptionScreen} />
+        <Stack.Screen name="Edit Subscription" component={EditSubscriptionScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
