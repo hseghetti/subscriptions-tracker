@@ -3,7 +3,6 @@ import { View, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Input } from '@rneui/themed';
 
-
 export default function EditSubscriptionScreen({ navigation, route }) {
   const [initialRender, setInitialRender] = useState(true);
   const { subscription } = route.params;
@@ -37,7 +36,6 @@ export default function EditSubscriptionScreen({ navigation, route }) {
   };
 
   useEffect(() => {
-    console.log('useEffect called.')
     validateForm();
   }, [name, amount, renewalDate]);
 
@@ -49,11 +47,10 @@ export default function EditSubscriptionScreen({ navigation, route }) {
           errors.name = 'Name is required.';
       }
 
-      // Validate email field
       if (!amount) {
-          errors.amount = 'Cost is required.';
+          errors.amount = 'Monthly Cost is required.';
       } else if (!/^\d*\.?\d*$/.test(amount)) {
-          errors.amount = 'Cost format is invalid.';
+          errors.amount = 'Monthly Cost format is invalid.';
       }
 
       if (!renewalDate) {
@@ -75,7 +72,7 @@ export default function EditSubscriptionScreen({ navigation, route }) {
         errorMessage={!initialRender && errors.name}
       />
       <Input
-        placeholder="Mounthly Cost ($)"
+        placeholder="Monthly Cost ($)"
         onChangeText={value => setAmount(value)}
         value={amount}
         errorMessage={!initialRender && errors.amount}
