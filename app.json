@@ -15,16 +15,29 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.minimalistdevelopment.subscriptionstracker"
     },
     "android": {
+      "compileSdkVersion": 33,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.minimalistdevelopment.subscriptionstracker",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d05652e5-a1b4-4818-b780-cc17118d52fa"
+      }
     }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "x",
+    "ios_app_id": "x"
   }
 }

@@ -56,23 +56,37 @@ export default function MainScreen({ navigation }) {
 
   return (
     <ThemeProvider theme={theme}>
-      <View >
-      <View style={styles.titleRow}>
-      <View>
-        <Text h4>Subscriptions</Text>
-        <Dropdown data={months} label="Select a month" onChange={item => {
-            setValue(item.value);
-          }}  labelField="label" valueField="value" value={value} selectedTextStyle={styles.selectedTextStyle}/>
-        <Text style={styles.subtitle}>
-          Total to pay on {getMonthName(value)}: $ {value? calculateTotalMonthlyCost(value) : 'Select a month'}
-        </Text>
-      </View>
-        <Button size="sm" title="New Subscription" onPress={() => navigation.navigate('New Subscription')} />
-      </View>
+      <View style={{ flex: 1,  justifyContent: 'center' }}>
+        <View style={styles.titleRow}>
+          <View>
+            <Text>Monthly Subscriptions</Text>
+            <Dropdown
+              data={months}
+              label="Select a month"
+              onChange={(item) => {
+                setValue(item.value);
+              }}
+              labelField="label"
+              valueField="value"
+              value={value}
+              selectedTextStyle={styles.selectedTextStyle}
+            />
+            <Text style={styles.subtitle}>
+              Total on {getMonthName(value)}: $ {value ? calculateTotalMonthlyCost(value) : "Select a month"}
+            </Text>
+          </View>
+          <View style={{ marginTop: 20 }}>
+            <Button size="sm" title="New Subscription"
+              onPress={() => navigation.navigate("New Subscription")} />
+              <Text style={styles.subtitle}>
+              Annual Total: $ {subscriptions.reduce((acc, item) => acc + parseFloat(item.amount), 0)}
+            </Text>
+          </View>
+        </View>
         <FlatList
           data={subscriptions}
           renderItem={({ item }) => (
-            <ListItem topDivider onPress={() => navigation.navigate('Edit Subscription', { subscription: item })}>
+            <ListItem topDivider onPress={() => navigation.navigate("Edit Subscription", { subscription: item })}>
               <ListItem.Content>
                 <ListItem.Title style={styles.itemTitle}>{item.name}</ListItem.Title>
                 <ListItem.Subtitle>Monthly Cost ($): {item.amount}</ListItem.Subtitle>
