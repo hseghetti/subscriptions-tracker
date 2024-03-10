@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Button, Input } from '@rneui/themed';
+import { Button, Input, ButtonGroup } from '@rneui/themed';
 
 export default function EditSubscriptionScreen({ navigation, route }) {
   const [initialRender, setInitialRender] = useState(true);
   const { subscription } = route.params;
   const [name, setName] = useState(subscription.name);
   const [amount, setAmount] = useState(subscription.amount);
+  const [selectedTypeIndex, setSelectedTypeIndex] = useState(subscription.selectedTypeIndex); // ['Monthly', 'Biannual', 'Annual'
   const [renewalDate, setRenewalDate] = useState(subscription.renewalDate);
   const [errors, setErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
+  const SUBSCRIPTIONS_TYPES = ['Monthly', 'Biannual', 'Annual'];
 
   const updateSubscription = async () => {
     if (initialRender) {
@@ -22,7 +24,7 @@ export default function EditSubscriptionScreen({ navigation, route }) {
     const storedSubscriptions = await AsyncStorage.getItem('subscriptions');
     const subscriptions = JSON.parse(storedSubscriptions);
     const index = subscriptions.findIndex((item) => item.id === subscription.id);
-    subscriptions[index] = { ...subscription, name, amount, renewalDate };
+    subscriptions[index] = { ...subscription, name, amount, renewalDate, selectedTypeIndex};
     await AsyncStorage.setItem('subscriptions', JSON.stringify(subscriptions));
     navigation.goBack();
   };
@@ -37,7 +39,7 @@ export default function EditSubscriptionScreen({ navigation, route }) {
 
   useEffect(() => {
     validateForm();
-  }, [name, amount, renewalDate]);
+  }, [name, amount, renewalDate, selectedTypeIndex]);
 
   const validateForm = () => {
       let errors = {};
@@ -71,8 +73,16 @@ export default function EditSubscriptionScreen({ navigation, route }) {
         value={name}
         errorMessage={!initialRender && errors.name}
       />
+      <ButtonGroup
+        buttons={SUBSCRIPTIONS_TYPES}
+        selectedIndex={selectedTypeIndex}
+        onPress={(value) => {
+          setSelectedTypeIndex(value);
+        }}
+        containerStyle={{ marginBottom: 20 }}
+      />
       <Input
-        placeholder="Monthly Cost ($)"
+        placeholder="Cost ($)"
         onChangeText={value => setAmount(value)}
         value={amount}
         errorMessage={!initialRender && errors.amount}
@@ -97,6 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'flex-start',
     flexDirection: 'column',
+    padding: 20,
   },
   buttonRow: {
     flexDirection: 'row',
