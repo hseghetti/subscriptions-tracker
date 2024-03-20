@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, View, StyleSheet } from "react-native";
-import { useFocusEffect } from '@react-navigation/native';
+import { FlatList, View, StyleSheet, Text, Button } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
-import { Text, Button, lightColors, createTheme, ThemeProvider, ListItem } from "@rneui/themed";
+import { lightColors, createTheme, ThemeProvider, ListItem } from "@rneui/themed";
 import { Dropdown } from "react-native-element-dropdown";
 
-const theme = createTheme({
-  lightColors: {
-    ...Platform.select({
-      default: lightColors.platform.android,
-      ios: lightColors.platform.ios,
-    }),
-  },
-});
+// const theme = createTheme({
+//   lightColors: {
+//     ...Platform.select({
+//       default: lightColors.platform.android,
+//       ios: lightColors.platform.ios,
+//     }),
+//   },
+// });
 
 export default function MainScreen({ navigation }) {
   const [subscriptions, setSubscriptions] = useState([]);
@@ -32,7 +32,7 @@ export default function MainScreen({ navigation }) {
     { label: "December", value: 11 },
   ];
   const [value, setValue] = useState(months[new Date().getMonth()].value);
-  const SUBSCRIPTIONS_TYPES = ["Monthly", "Biannual", "Annual"];
+  const SUBSCRIPTIONS_TYPES = ["Monthly", "Semi-Annual", "Annual"];
 
   useFocusEffect(
     React.useCallback(() => {
@@ -43,44 +43,47 @@ export default function MainScreen({ navigation }) {
           if (JSON.stringify(subscriptions) !== storedSubscriptions) setSubscriptions(JSON.parse(storedSubscriptions));
         } else setSubscriptions([]);
       })();
-    }
-    , [subscriptions])
+    }, [subscriptions])
   );
 
   useEffect(() => {
     (async () => {
       const storedSubscriptions = await AsyncStorage.getItem("subscriptions");
       if (storedSubscriptions) {
-        console.log(JSON.stringify(subscriptions) !== storedSubscriptions);
         // check if subscriptions is different from storedSubscriptions
         if (JSON.stringify(subscriptions) !== storedSubscriptions) setSubscriptions(JSON.parse(storedSubscriptions));
-      }
-      else setSubscriptions([]);
+      } else setSubscriptions([]);
     })();
   }, [subscriptions]);
 
   const calculateTotalMonthlyCost = (selectedMonth) => {
     if (subscriptions) {
-      return subscriptions.reduce((acc, item) => {
+      const amount = subscriptions.reduce((acc, item) => {
         let month;
-        if (item.selectedMonthIndex1) month = item.selectedMonthIndex1;
-        else if (item.selectedMonthIndex2) month = item.selectedMonthIndex2 + 6;
-
-        return item.selectedTypeIndex!==0 && month!==selectedMonth && item.monthlyCost ? acc + parseFloat(item.monthlyCost[month]) : 0; // ver los logs porque no está guardando el monthlyCost
+        if (item.selectedMonthIndex1) month = item.selectedMonthIndex1; // setup month renew
+        else if (item.selectedMonthIndex2) month = item.selectedMonthIndex2 + 6; // setup month renew
+        return item.selectedTypeIndex !== 0 && month !== selectedMonth && item?.monthlyCost[selectedMonth]
+          ? acc + item.monthlyCost[selectedMonth]
+          : acc;
       }, 0);
+
+      return parseFloat(amount).toFixed(2);
     }
   };
 
   const calculateTotalMonthlyPay = (selectedMonth) => {
-    return subscriptions.reduce((acc, item) => {
+    const amount = subscriptions.reduce((acc, item) => {
       let month;
       if (item.selectedMonthIndex1) month = item.selectedMonthIndex1;
       else if (item.selectedMonthIndex2) month = item.selectedMonthIndex2 + 6;
-      if (month === selectedMonth || item.selectedTypeIndex===0) {
+      if (month === selectedMonth || item.selectedTypeIndex === 0) {
         return acc + parseFloat(item.amount);
       }
+
       return acc;
     }, 0);
+
+    return parseFloat(amount).toFixed(2);
   };
 
   const getMonthName = (month) => {
@@ -109,65 +112,66 @@ export default function MainScreen({ navigation }) {
     }
   };
 
+  const subscriptionsTotal = () => {
+    const amount = subscriptions.reduce((acc, item) => {
+      return acc + parseFloat(item.amount);
+    }, 0);
+
+    return parseFloat(amount).toFixed(2);
+  }
+
   return (
-    <ThemeProvider theme={theme}>
-      <View style={{ flex: 1,  flexDirection: "column", alignItems:'stretch'}}>
-        <View>
-          <View style={styles.titleRow}>
-            <View style={{alignItems: 'stretch'}}>
-              <Text style={{ fontWeight: "bold" }}>Monthly Subscriptions</Text>
-              <View style={{ flexDirection: "row"}}>
-                <Dropdown
-                  data={months}
-                  label="Select a month"
-                  onChange={(item) => {
-                    setValue(item.value);
-                  }}
-                  labelField="label"
-                  valueField="value"
-                  value={value}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  style={styles.dropdown}
-                />
-                <View style={{ marginTop: 5, marginLeft: 20 }}>
-                  <Button size="sm" title="New Subscription" onPress={() => navigation.navigate("New Subscription")} />
-                </View>
+    // <ThemeProvider theme={theme}>
+      <View style={{height:'99%'}}>
+        <View style={styles.titleRow}>
+          <View style={{ alignItems: "stretch" }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Dropdown
+                data={months}
+                label="Select a month"
+                onChange={(item) => {
+                  setValue(item.value);
+                }}
+                labelField="label"
+                valueField="value"
+                value={value}
+                selectedTextStyle={styles.selectedTextStyle}
+                style={styles.dropdown}
+              />
+              <View style={{ marginTop: 5}}>
+                <Button size="sm" title="New Subscription" onPress={() => navigation.navigate("New Subscription")} />
               </View>
-              <Text style={styles.subtitle}>
-                Total to pay on {getMonthName(value)}: $ {value ? calculateTotalMonthlyPay(value) : "Select a month"}
-              </Text>
-              <Text style={styles.subtitle}>
-                {getMonthName(value)} Suggested Saving: $ {value ? calculateTotalMonthlyCost(value) : "Select a month"}
-              </Text>
-              <Text style={styles.subtitle}>
-                Subscriptions Total: $ {subscriptions.reduce((acc, item) => acc + parseFloat(item.amount), 0)}
-              </Text>
             </View>
-
+            <Text style={styles.subtitle}>
+              Total to pay on {getMonthName(value)}: $ {calculateTotalMonthlyPay(value) }
+            </Text>
+            <Text style={styles.subtitle}>
+              {getMonthName(value)} Suggested Saving: $ {calculateTotalMonthlyCost(value)}
+            </Text>
+            <Text style={styles.subtitle}>
+              Subscriptions Total: $ {subscriptionsTotal()}
+            </Text>
           </View>
-
-            <FlatList
-              data={subscriptions}
-              renderItem={({ item }) => (
-                <ListItem topDivider onPress={() => navigation.navigate("New Subscription", { subscription: item })}>
-                  <ListItem.Content>
-                    <ListItem.Title style={styles.itemTitle}>{item.name}</ListItem.Title>
-                    <ListItem.Subtitle style={styles.itemDetail}>Subscription Cost ($): {item.amount}</ListItem.Subtitle>
-                    <ListItem.Subtitle>Monthly Cost ($): {getMonthtlyCost(item)}</ListItem.Subtitle>
-                    <ListItem.Subtitle>
-                      Subscription Type: {SUBSCRIPTIONS_TYPES[item.selectedTypeIndex]}
-                    </ListItem.Subtitle>
-                    <ListItem.Subtitle>
-                      First Month: {getSubsMonth(item.selectedMonthIndex1, item.selectedMonthIndex2)}
-                    </ListItem.Subtitle>
-                  </ListItem.Content>
-                </ListItem>
-              )}
-              keyExtractor={(item) => item.id}
-            />
         </View>
+        <FlatList
+          data={subscriptions}
+          renderItem={({ item }) => (
+            <ListItem topDivider onPress={() => navigation.navigate("New Subscription", { subscription: item })}>
+              <ListItem.Content>
+                <ListItem.Title style={styles.itemTitle}>{item.name}</ListItem.Title>
+                <ListItem.Subtitle style={styles.itemDetail}>Subscription Cost ($): {item.amount}</ListItem.Subtitle>
+                <ListItem.Subtitle>Monthly Cost ($): {getMonthtlyCost(item)}</ListItem.Subtitle>
+                <ListItem.Subtitle>Billing Period: {SUBSCRIPTIONS_TYPES[item.selectedTypeIndex]}</ListItem.Subtitle>
+                <ListItem.Subtitle>
+                Subscription Starts: {getSubsMonth(item.selectedMonthIndex1, item.selectedMonthIndex2)}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+            </ListItem>
+          )}
+          keyExtractor={(item) => item.id}
+        />
       </View>
-    </ThemeProvider>
+    // </ThemeProvider>
   );
 }
 
@@ -177,13 +181,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    alignItems: 'stretch'
+    alignItems: "stretch",
   },
   titleRow: {
     // flexDirection: "row",
     // justifyContent: "center",
     padding: 3,
-
   },
   subtitle: {
     paddingTop: 10,

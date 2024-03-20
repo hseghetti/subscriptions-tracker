@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Button, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Button, Input, ButtonGroup, Divider, Text } from '@rneui/themed';
+import { Input, ButtonGroup } from '@rneui/themed';
 
 export default function NewSubscriptionScreen({ navigation, route }) {
-  // console.log(route);
   const { subscription } = route.params || {};
   const [initialRender, setInitialRender] = useState(true);
   const [name, setName] = useState(subscription?.name || '');
@@ -14,7 +13,7 @@ export default function NewSubscriptionScreen({ navigation, route }) {
   const [selectedTypeIndex, setSelectedTypeIndex] = useState(subscription?.selectedTypeIndex || 0); // ['Monthly', 'Biannual', 'Annual'
   const [selectedMonthIndex1, setSelectedMonthIndex1] = useState(subscription?.selectedMonthIndex1 || 0);
   const [selectedMonthIndex2, setSelectedMonthIndex2] = useState(subscription?.selectedMonthIndex2 || undefined);
-  const SUBSCRIPTIONS_TYPES = ['Monthly', 'Biannual', 'Annual'];
+  const SUBSCRIPTIONS_TYPES = ['Monthly', 'Semi-Annual', 'Annual'];
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   const addSubscription = async () => {
@@ -43,7 +42,6 @@ export default function NewSubscriptionScreen({ navigation, route }) {
     const subscriptions = JSON.parse(storedSubscriptions);
     const index = subscriptions.findIndex((item) => item.id === subscription.id);
     subscriptions[index] = { ...subscription, name, amount, monthlyCost: getMonthlyCost(amount), selectedMonthIndex1, selectedMonthIndex2, selectedTypeIndex};
-    console.log(subscriptions[index]);
     await AsyncStorage.setItem('subscriptions', JSON.stringify(subscriptions));
     navigation.goBack();
   };
@@ -156,7 +154,6 @@ export default function NewSubscriptionScreen({ navigation, route }) {
         errorMessage={!initialRender && errors.amount}
       />
       <Text style={{color: 'grey'}}>Starting Month</Text>
-      <Divider />
       <ButtonGroup
         selectedIndex={selectedMonthIndex1}
         buttons={MONTHS.slice(0, 6).map(month => month.substring(0, 3))}
@@ -182,6 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     paddingTop: 20,
+    height: '99%',
   },
   buttonRow: {
     flexDirection: 'row',
