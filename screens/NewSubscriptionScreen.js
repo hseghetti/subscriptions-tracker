@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Button, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Input, ButtonGroup } from '@rneui/themed';
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+const adUnitId = __DEV__ ? TestIds.ADAPTIVE_BANNER : 'x';
 
 export default function NewSubscriptionScreen({ navigation, route }) {
   const { subscription } = route.params || {};
@@ -134,47 +136,56 @@ export default function NewSubscriptionScreen({ navigation, route }) {
   }
 
   return (
-    <View style={styles.container}>
-      <Input
-        placeholder="Description"
-        onChangeText={value => setName(value)}
-        value={name}
-        errorMessage={!initialRender && errors.name}
-      />
-      <ButtonGroup
-        selectedIndex={selectedTypeIndex}
-        buttons={SUBSCRIPTIONS_TYPES}
-        onPress={(index) => setSelectedTypeIndex(index)}
-        containerStyle={{ marginBottom: 20 }}
-      />
-      <Input
-        placeholder="Cost ($)"
-        onChangeText={value => setAmount(value)}
-        value={amount}
-        errorMessage={!initialRender && errors.amount}
-      />
-      <Text style={{color: 'grey'}}>Starting Month</Text>
-      <ButtonGroup
-        selectedIndex={selectedMonthIndex1}
-        buttons={MONTHS.slice(0, 6).map(month => month.substring(0, 3))}
-        onPress={(index) => setMonthSelection(1, index)}
-        containerStyle={{ marginBottom: 20 }}
-      />
-      <ButtonGroup
-        selectedIndex={selectedMonthIndex2}
-        buttons={MONTHS.slice(6, 12).map(month => month.substring(0, 3))}
-        onPress={(index) => setMonthSelection(2, index)}
-        containerStyle={{ marginBottom: 20 }}
-      />
+    <View style={{flex:1, flexDirection: 'column'}}>
+      <View style={styles.container}>
+        <Input
+          placeholder="Description"
+          onChangeText={value => setName(value)}
+          value={name}
+          errorMessage={!initialRender && errors.name}
+        />
+        <ButtonGroup
+          selectedIndex={selectedTypeIndex}
+          buttons={SUBSCRIPTIONS_TYPES}
+          onPress={(index) => setSelectedTypeIndex(index)}
+          containerStyle={{ marginBottom: 20 }}
+        />
+        <Input
+          placeholder="Cost ($)"
+          onChangeText={value => setAmount(value)}
+          value={amount}
+          errorMessage={!initialRender && errors.amount}
+        />
+        <Text style={{color: 'grey'}}>Starting Month</Text>
+        <ButtonGroup
+          selectedIndex={selectedMonthIndex1}
+          buttons={MONTHS.slice(0, 6).map(month => month.substring(0, 3))}
+          onPress={(index) => setMonthSelection(1, index)}
+          containerStyle={{ marginBottom: 20 }}
+        />
+        <ButtonGroup
+          selectedIndex={selectedMonthIndex2}
+          buttons={MONTHS.slice(6, 12).map(month => month.substring(0, 3))}
+          onPress={(index) => setMonthSelection(2, index)}
+          containerStyle={{ marginBottom: 20 }}
+        />
 
-      {subscription ? renderEditSubscriptionActions() : renderNewSubscriptionActions()}
+        {subscription ? renderEditSubscriptionActions() : renderNewSubscriptionActions()}
+      </View>
+      <View style={{flex:1, flexDirection: 'row', justifyContent: 'center',}}>
+              <BannerAd
+                unitId={adUnitId}
+                size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                onAdFailedToLoad={error => console.log(error)}
+            />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 10,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'flex-start',

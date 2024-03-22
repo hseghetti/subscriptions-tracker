@@ -17,13 +17,13 @@ export default function App() {
           <Stack.Screen name="New Subscription" component={NewSubscriptionScreen} options={{ animationEnabled: false, animation: 'none', }} />
         </Stack.Navigator>
       </NavigationContainer>
-      <View>
+      {/* <View>
             <BannerAd
               unitId={adUnitId}
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
               onAdFailedToLoad={error => console.log(error)}
           />
-      </View>
+      </View> */}
     </View>
   );
 }

@@ -5,6 +5,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import { lightColors, createTheme, ThemeProvider, ListItem } from "@rneui/themed";
 import { Dropdown } from "react-native-element-dropdown";
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+const adUnitId = __DEV__ ? TestIds.ADAPTIVE_BANNER : '';
 
 // const theme = createTheme({
 //   lightColors: {
@@ -41,7 +43,7 @@ export default function MainScreen({ navigation }) {
         if (storedSubscriptions) {
           // check if subscriptions is different from storedSubscriptions
           if (JSON.stringify(subscriptions) !== storedSubscriptions) setSubscriptions(JSON.parse(storedSubscriptions));
-        } else setSubscriptions([]);
+        }
       })();
     }, [subscriptions])
   );
@@ -52,7 +54,7 @@ export default function MainScreen({ navigation }) {
       if (storedSubscriptions) {
         // check if subscriptions is different from storedSubscriptions
         if (JSON.stringify(subscriptions) !== storedSubscriptions) setSubscriptions(JSON.parse(storedSubscriptions));
-      } else setSubscriptions([]);
+      }
     })();
   }, [subscriptions]);
 
@@ -122,7 +124,8 @@ export default function MainScreen({ navigation }) {
 
   return (
     // <ThemeProvider theme={theme}>
-      <View style={{height:'99%'}}>
+    <View style={{flex:1, flexDirection: 'column'}}>
+      <View style={{flex:10,  justifyContent: 'center',}}>
         <View style={styles.titleRow}>
           <View style={{ alignItems: "stretch" }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -170,6 +173,14 @@ export default function MainScreen({ navigation }) {
           )}
           keyExtractor={(item) => item.id}
         />
+      </View>
+        <View style={{flex:1, flexDirection: 'row', justifyContent: 'center',}}>
+              <BannerAd
+                unitId={adUnitId}
+                size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                onAdFailedToLoad={error => console.log(error)}
+            />
+        </View>
       </View>
     // </ThemeProvider>
   );
